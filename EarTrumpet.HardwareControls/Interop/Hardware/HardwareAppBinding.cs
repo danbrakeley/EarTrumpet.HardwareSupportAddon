@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using EarTrumpet.DataModel.AppInformation;
 using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.Storage;
 using EarTrumpet.HardwareControls.ViewModels;
@@ -94,6 +95,27 @@ namespace EarTrumpet.HardwareControls.Interop.Hardware
             }
             
             return result;
+        }
+
+        protected List<IAppItemViewModel> GetFocusedApps(string deviceName)
+        {
+            var activatedHandle = User32.GetForegroundWindow();
+            if (activatedHandle == IntPtr.Zero) {
+                return null;
+            }
+
+            int activeProcId;
+            // Note: the return value of GetWindowThreadProcessId() is the thread id, and is safe to ignore.
+            User32.GetWindowThreadProcessId(activatedHandle, out activeProcId);
+
+            // Ask EarTrumpet to collate info about this app
+            var appinfo = AppInformationFactory.CreateForProcess(activeProcId);
+            if (appinfo == null)
+            {
+                return null;
+            }
+
+            return GetAppsByName(deviceName, appinfo.DisplayName);
         }
 
         protected void LoadSettings(string key)

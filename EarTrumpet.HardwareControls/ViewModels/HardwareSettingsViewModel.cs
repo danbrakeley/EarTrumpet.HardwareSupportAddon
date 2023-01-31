@@ -88,6 +88,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
             set
             {
                 _selectedMode = value;
+                IndexesApplicationsSelectionEnabled = !(string.IsNullOrEmpty(value) || Properties.Resources.ApplicationFocusText == value);
                 RefreshApps();
             }
             get
@@ -118,7 +119,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
                     // -> Enable Mode and Selection ComboBoxes.
 
                     ModeSelectionEnabled = true;
-                    IndexesApplicationsSelectionEnabled = true;
+                    IndexesApplicationsSelectionEnabled = !(string.IsNullOrEmpty(_selectedMode) || Properties.Resources.ApplicationFocusText == _selectedMode);
                 }
                 else
                 {
@@ -182,14 +183,14 @@ namespace EarTrumpet.HardwareControls.ViewModels
         {
             get
             {
-                // Two modes are supported: "Indexed" and "Application Selection"
-                // In "Indexed" mode, the user can assign an application index to a control.
-                // In "Application Selection" mode, the user can select from a list of running applications.
-
                 ObservableCollection<String> modes = new ObservableCollection<string>();
 
+                // In "Indexed" mode, the user can assign an application index to a control.
                 modes.Add(Properties.Resources.IndexedText);
+                // In "Application Selection" mode, the user can select from a list of running applications.
                 modes.Add(Properties.Resources.ApplicationSelectionText);
+                // In "Application Focus" mode, the focused application has its volume changed (if possible).
+                modes.Add(Properties.Resources.ApplicationFocusText);
 
                 return modes;
             }
@@ -341,6 +342,10 @@ namespace EarTrumpet.HardwareControls.ViewModels
             {
                 mode = CommandControlMappingElement.Mode.ApplicationSelection;
             }
+            else if (SelectedMode == Properties.Resources.ApplicationFocusText)
+            {
+                mode = CommandControlMappingElement.Mode.ApplicationFocus;
+            }
 
             _commandControlMappingElement = new CommandControlMappingElement(_hardwareConfiguration, SelectedDevice,
                 command, mode, SelectedIndexesApplications);
@@ -396,7 +401,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
             }
             else
             {
-                // Invalid mode. Do nothing.
+                // Leave app/index names list empty.
             }
         }
 
@@ -411,6 +416,9 @@ namespace EarTrumpet.HardwareControls.ViewModels
                         break;
                     case CommandControlMappingElement.Mode.ApplicationSelection:
                         SelectedMode = Properties.Resources.ApplicationSelectionText;
+                        break;
+                    case CommandControlMappingElement.Mode.ApplicationFocus:
+                        SelectedMode = Properties.Resources.ApplicationFocusText;
                         break;
                 }
 

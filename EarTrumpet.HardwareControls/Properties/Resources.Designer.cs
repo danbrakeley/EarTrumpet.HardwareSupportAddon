@@ -88,6 +88,15 @@ namespace EarTrumpet.HardwareControls.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Application Focus.
+        /// </summary>
+        public static string ApplicationFocusText {
+            get {
+                return ResourceManager.GetString("ApplicationFocusText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Application Mute.
         /// </summary>
         public static string ApplicationMuteText {

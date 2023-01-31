@@ -324,4 +324,7 @@
   <data name="MappingsListTypeSysVolText" xml:space="preserve">
     <value>System Volume</value>
   </data>
+  <data name="ApplicationFocusText" xml:space="preserve">
+    <value>Application Focus</value>
+  </data>
 </root>

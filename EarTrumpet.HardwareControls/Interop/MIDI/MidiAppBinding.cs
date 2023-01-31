@@ -215,6 +215,9 @@ namespace EarTrumpet.HardwareControls.Interop.MIDI
             } else if (command.mode == CommandControlMappingElement.Mode.Indexed)
             {
                 apps = GetAppsByIndex(command.audioDevice, command.indexApplicationSelection);
+            } else if (command.mode == CommandControlMappingElement.Mode.ApplicationFocus)
+            {
+                apps = GetFocusedApps(command.audioDevice);
             }
                 
             if (apps == null)
