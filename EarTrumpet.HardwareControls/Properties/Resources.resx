@@ -298,10 +298,10 @@
     <value>Mappings</value>
   </data>
   <data name="MappingsListHeaderContextText" xml:space="preserve">
-    <value>Device or App</value>
+    <value>App</value>
   </data>
   <data name="MappingsListHeaderControlText" xml:space="preserve">
-    <value>Hardware Control</value>
+    <value>Control</value>
   </data>
   <data name="MappingsListHeaderTypeText" xml:space="preserve">
     <value>Mapping Type</value>
@@ -326,5 +326,17 @@
   </data>
   <data name="ApplicationFocusText" xml:space="preserve">
     <value>Application Focus</value>
+  </data>
+  <data name="AppIndexText" xml:space="preserve">
+    <value>App Index</value>
+  </data>
+  <data name="AppNameText" xml:space="preserve">
+    <value>App Name</value>
+  </data>
+  <data name="MappingsListFocusedAppText" xml:space="preserve">
+    <value>focused app</value>
+  </data>
+  <data name="MappingsListHeaderDeviceText" xml:space="preserve">
+    <value>Device</value>
   </data>
 </root>

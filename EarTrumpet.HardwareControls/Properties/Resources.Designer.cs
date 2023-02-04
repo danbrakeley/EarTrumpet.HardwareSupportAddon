@@ -88,6 +88,15 @@ namespace EarTrumpet.HardwareControls.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to App Index.
+        /// </summary>
+        public static string AppIndexText {
+            get {
+                return ResourceManager.GetString("AppIndexText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Application Focus.
         /// </summary>
         public static string ApplicationFocusText {
@@ -120,6 +129,15 @@ namespace EarTrumpet.HardwareControls.Properties {
         public static string ApplicationVolumeText {
             get {
                 return ResourceManager.GetString("ApplicationVolumeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to App Name.
+        /// </summary>
+        public static string AppNameText {
+            get {
+                return ResourceManager.GetString("AppNameText", resourceCulture);
             }
         }
         
@@ -376,6 +394,15 @@ namespace EarTrumpet.HardwareControls.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to focused app.
+        /// </summary>
+        public static string MappingsListFocusedAppText {
+            get {
+                return ResourceManager.GetString("MappingsListFocusedAppText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mappings.
         /// </summary>
         public static string MappingsListHeaderAltText {
@@ -385,7 +412,7 @@ namespace EarTrumpet.HardwareControls.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Device or App.
+        ///   Looks up a localized string similar to App.
         /// </summary>
         public static string MappingsListHeaderContextText {
             get {
@@ -394,11 +421,20 @@ namespace EarTrumpet.HardwareControls.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hardware Control.
+        ///   Looks up a localized string similar to Control.
         /// </summary>
         public static string MappingsListHeaderControlText {
             get {
                 return ResourceManager.GetString("MappingsListHeaderControlText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Device.
+        /// </summary>
+        public static string MappingsListHeaderDeviceText {
+            get {
+                return ResourceManager.GetString("MappingsListHeaderDeviceText", resourceCulture);
             }
         }
         

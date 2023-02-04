@@ -49,7 +49,7 @@ namespace EarTrumpet.HardwareControls.Interop.Hardware
             {
                 try
                 {
-                    var config = Convert.ChangeType(command.hardwareConfiguration, type);
+                    var config = Convert.ChangeType(command.config, type);
                     bindings[type].AddCommand(command);
                     break;
                 }
@@ -128,7 +128,7 @@ namespace EarTrumpet.HardwareControls.Interop.Hardware
             {
                 try
                 {
-                    var c = Convert.ChangeType(config.hardwareConfiguration, type);
+                    var c = Convert.ChangeType(config.config, type);
                     return bindings[type].Name;
                 }
                 catch (InvalidCastException)

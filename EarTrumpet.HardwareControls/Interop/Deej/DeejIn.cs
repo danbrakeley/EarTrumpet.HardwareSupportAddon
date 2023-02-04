@@ -222,7 +222,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
             {
                 foreach (var command in commands)
                 {
-                    var config = (DeejConfiguration) command.hardwareConfiguration;
+                    var config = (DeejConfiguration) command.config;
                     if (config.Port == device)
                     {
                         _StartListening(device);

@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using EarTrumpet.UI.Helpers;
 using EarTrumpet.Extensions;
@@ -9,12 +10,42 @@ using EarTrumpet.UI.ViewModels;
 
 namespace EarTrumpet.HardwareControls.ViewModels
 {
+    public class AppInfo : IEquatable<AppInfo>
+    {
+        public string AppId { get; set; }
+        public string DisplayName { get; set; }
+        
+        public AppInfo(string appId, string displayName)
+        {
+            this.AppId = appId.ToLower();
+            this.DisplayName = displayName;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            AppInfo objAsApp = obj as AppInfo;
+            if (objAsApp == null) return false;
+            else return Equals(objAsApp);
+        }
+        public override int GetHashCode()
+        {
+            return this.AppId.GetHashCode();
+        }
+        public bool Equals(AppInfo other)
+        {
+            if (other == null) return false;
+            return this.AppId == other.AppId;
+        }
+    }
+
     public class HardwareSettingsViewModel : BindableBase
     {
         public ICommand SaveCommandControlMappingCommand { get; }
         public ICommand SelectControlCommand { get; }
         public string SelectedControl { get; set; }
-        public string SelectedIndexesApplications { set; get; }
+        public AppInfo SelectedApp { get; set; }
+        public int SelectedAppIndex { get; set; }
         public string SelectedDevice
         {
             set
@@ -30,6 +61,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
                         if (dev.DisplayName == value)
                         {
                             _selectedDevice = dev;
+                            break;
                         }
                     }
                 }
@@ -88,7 +120,8 @@ namespace EarTrumpet.HardwareControls.ViewModels
             set
             {
                 _selectedMode = value;
-                IndexesApplicationsSelectionEnabled = !(string.IsNullOrEmpty(value) || Properties.Resources.ApplicationFocusText == value);
+                IndexSelectionEnabled = value == Properties.Resources.IndexedText;
+                AppSelectionEnabled = value == Properties.Resources.ApplicationSelectionText;
                 RefreshApps();
             }
             get
@@ -110,7 +143,8 @@ namespace EarTrumpet.HardwareControls.ViewModels
                     // -> Disable Mode and Selection ComboBoxes.
 
                     ModeSelectionEnabled = false;
-                    IndexesApplicationsSelectionEnabled = false;
+                    IndexSelectionEnabled = false;
+                    AppSelectionEnabled = false;
                 }
                 else if (Properties.Resources.ApplicationVolumeText == value || 
                          Properties.Resources.ApplicationMuteText == value)
@@ -119,9 +153,9 @@ namespace EarTrumpet.HardwareControls.ViewModels
                     // -> Enable Mode and Selection ComboBoxes.
 
                     ModeSelectionEnabled = true;
-                    IndexesApplicationsSelectionEnabled = !(string.IsNullOrEmpty(_selectedMode) || Properties.Resources.ApplicationFocusText == _selectedMode);
-                }
-                else
+                    IndexSelectionEnabled = _selectedMode == Properties.Resources.IndexedText;
+                    AppSelectionEnabled = _selectedMode == Properties.Resources.ApplicationSelectionText;
+                } else
                 {
                     // Invalid selection. Do nothing.
                 }
@@ -132,17 +166,22 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 return _selectedCommand;
             }
         }
-        public Boolean IndexesApplicationsSelectionEnabled
+        public Boolean IndexSelectionEnabled
         {
+            get { return _indexSelectionEnabled; }
             set
             {
-                _indexesApplicationsSelectionEnabled = value;
-                RaisePropertyChanged("IndexesApplicationsSelectionEnabled");
+                _indexSelectionEnabled = value;
+                RaisePropertyChanged("IndexSelectionEnabled");
             }
-
-            get
+        }
+        public Boolean AppSelectionEnabled
+        {
+            get { return _appSelectionEnabled; }
+            set
             {
-                return _indexesApplicationsSelectionEnabled;
+                _appSelectionEnabled = value;
+                RaisePropertyChanged("AppSelectionEnabled");
             }
         }
         public ObservableCollection<string> AudioDevices
@@ -172,12 +211,13 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 return deviceTypes;
             }
         }
-        public ObservableCollection<string> ApplicationIndexesNames
+        public ObservableCollection<AppInfo> SelectableApps
         {
-            get
-            {
-                return _applicationIndexesNames;
-            }
+            get { return _apps; }
+        }
+        public ObservableCollection<int> SelectableIndexes
+        {
+            get { return _indexes; }
         }
         public ObservableCollection<string> Modes
         {
@@ -197,23 +237,12 @@ namespace EarTrumpet.HardwareControls.ViewModels
         }
         public ObservableCollection<string> Commands
         {
-            get
-            {
-                return _commands;
-            }
-
-            set
-            {
-                _commands = value;
-            }
+            get { return _commands; }
+            set { _commands = value; }
         }
         public string SelectedDeviceType
         {
-            get
-            {
-                return _selectedDeviceType;
-            }
-
+            get { return _selectedDeviceType; }
             set
             {
                 _selectedDeviceType = value;
@@ -227,8 +256,10 @@ namespace EarTrumpet.HardwareControls.ViewModels
         private String _selectedMode;
         private String _selectedCommand;
         private string _selectedDeviceType;
-        private Boolean _indexesApplicationsSelectionEnabled = false;
-        private ObservableCollection<String> _applicationIndexesNames = new ObservableCollection<string>();
+        private Boolean _indexSelectionEnabled = false;
+        private Boolean _appSelectionEnabled = false;
+        private ObservableCollection<AppInfo> _apps = new ObservableCollection<AppInfo>();
+        private ObservableCollection<int> _indexes = new ObservableCollection<int>();
         private WindowHolder _ControlWizardWindow = null;
         private HardwareConfiguration _hardwareConfiguration = null;
         private CommandControlMappingElement _commandControlMappingElement = null;
@@ -298,7 +329,8 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 string.IsNullOrEmpty(SelectedDevice) ||
                 string.IsNullOrEmpty(SelectedCommand) ||
                 (ModeSelectionEnabled && string.IsNullOrEmpty(SelectedMode)) ||
-                (IndexesApplicationsSelectionEnabled && string.IsNullOrEmpty(SelectedIndexesApplications)) ||
+                (IndexSelectionEnabled && SelectedAppIndex < 0) ||
+                (AppSelectionEnabled && SelectedApp == null) ||
                 string.IsNullOrEmpty(SelectedDeviceType))
             {
                 // Do nothing if the settings were not done yet.
@@ -347,8 +379,21 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 mode = CommandControlMappingElement.Mode.ApplicationFocus;
             }
 
-            _commandControlMappingElement = new CommandControlMappingElement(_hardwareConfiguration, SelectedDevice,
-                command, mode, SelectedIndexesApplications);
+            string appId = null, displayName = null;
+            if (SelectedApp != null)
+            {
+                appId = SelectedApp.AppId;
+                displayName = SelectedApp.DisplayName;
+            }
+
+            _commandControlMappingElement = new CommandControlMappingElement(
+                SelectedDevice,
+                command,
+                mode,
+                appId,
+                displayName,
+                SelectedAppIndex,
+                _hardwareConfiguration);
 
             // Notify the hardware controls page about the new assignment.
             _hardwareControls.ControlCommandMappingSelectedCallback(_commandControlMappingElement);
@@ -366,7 +411,8 @@ namespace EarTrumpet.HardwareControls.ViewModels
 
         private void RefreshApps()
         {
-            _applicationIndexesNames.Clear();
+            _apps.Clear();
+            _indexes.Clear();
 
             if (Properties.Resources.ApplicationSelectionText == SelectedMode)
             {
@@ -376,9 +422,10 @@ namespace EarTrumpet.HardwareControls.ViewModels
                     {
                         foreach(var app in dev.Apps)
                         {
-                            if(!_applicationIndexesNames.Contains(app.DisplayName))
+                            var appInfo = new AppInfo(app.AppId, app.DisplayName);
+                            if (!_apps.Contains(appInfo))
                             {
-                                _applicationIndexesNames.Add(app.DisplayName);
+                                _apps.Add(appInfo);
                             }
                         }
                     }
@@ -387,16 +434,16 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 {
                     foreach (var app in _selectedDevice?.Apps)
                     {
-                        _applicationIndexesNames.Add(app.DisplayName);
+                        _apps.Add(new AppInfo(app.AppId, app.DisplayName));
                     }
                 }
             }
             else if (Properties.Resources.IndexedText == SelectedMode)
             {
                 // We do not expect more than 20 applications to be addressed.
-                for(var i = 0; i < 20; i++)
+                for (var i = 0; i < 20; i++)
                 {
-                    _applicationIndexesNames.Add(i.ToString());
+                    _indexes.Add(i);
                 }
             }
             else
@@ -413,16 +460,16 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 {
                     case CommandControlMappingElement.Mode.Indexed:
                         SelectedMode = Properties.Resources.IndexedText;
+                        SelectedAppIndex = data.index;
                         break;
                     case CommandControlMappingElement.Mode.ApplicationSelection:
                         SelectedMode = Properties.Resources.ApplicationSelectionText;
+                        SelectedApp = new AppInfo(data.appId, data.appDisplayName);
                         break;
                     case CommandControlMappingElement.Mode.ApplicationFocus:
                         SelectedMode = Properties.Resources.ApplicationFocusText;
                         break;
                 }
-
-                SelectedIndexesApplications = data.indexApplicationSelection;
             }
 
             SelectedDevice = data.audioDevice;
@@ -452,8 +499,8 @@ namespace EarTrumpet.HardwareControls.ViewModels
             }
 
             SelectedDeviceType = HardwareManager.Current.GetConfigType(data);
-            SelectedControl = data.hardwareConfiguration.ToString();
-            _hardwareConfiguration = data.hardwareConfiguration;
+            SelectedControl = data.config.ToString();
+            _hardwareConfiguration = data.config;
         }
     }
 }

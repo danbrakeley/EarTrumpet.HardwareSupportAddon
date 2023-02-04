@@ -60,41 +60,32 @@ namespace EarTrumpet.HardwareControls.Interop.Hardware
             return result;
         }
         
-        protected List<IAppItemViewModel> GetAppsByName(string deviceName, string appName)
+        protected List<IAppItemViewModel> GetAppsByAppId(string deviceName, string appId)
         {
-            var devices = GetDevicesByName(deviceName);
-            var result = new List<IAppItemViewModel>();
+            var appIdLowerCase = appId.ToLower();
+            var apps = new List<IAppItemViewModel>();
 
-            foreach (var device in devices)
+            foreach (var device in GetDevicesByName(deviceName))
             {
-                result.AddRange(device.Apps.Where(app => app.DisplayName == appName));
+                apps.AddRange(device.Apps.Where(app => app.AppId.ToLower() == appIdLowerCase));
             }
 
-            return result;
+            return apps;
         }
-        
-        protected List<IAppItemViewModel> GetAppsByIndex(string deviceName, string index)
+
+        protected List<IAppItemViewModel> GetAppsByIndex(string deviceName, int index)
         {
-            var result = new List<IAppItemViewModel>();
+            var apps = new List<IAppItemViewModel>();
             
             foreach (var device in GetDevicesByName(deviceName))
             {
-                try
+                if (index < device.Apps.Count())
                 {
-                    var i = int.Parse(index);
-                    
-                    if (device.Apps.Count() > i)
-                    {
-                        result.Add(device.Apps[i]);
-                    }
-                }
-                catch (FormatException)
-                {
-                    return null;
+                    apps.Add(device.Apps[index]);
                 }
             }
             
-            return result;
+            return apps;
         }
 
         protected List<IAppItemViewModel> GetFocusedApps(string deviceName)
@@ -115,7 +106,10 @@ namespace EarTrumpet.HardwareControls.Interop.Hardware
                 return null;
             }
 
-            return GetAppsByName(deviceName, appinfo.DisplayName);
+            // TODO: is the appId always the package install path?
+            var appId = appinfo.PackageInstallPath;
+
+            return GetAppsByAppId(deviceName, appId);
         }
 
         protected void LoadSettings(string key)

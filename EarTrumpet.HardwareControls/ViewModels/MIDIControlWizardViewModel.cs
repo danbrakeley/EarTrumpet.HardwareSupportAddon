@@ -230,11 +230,11 @@ namespace EarTrumpet.HardwareControls.ViewModels
         private byte _controlValue = 0;
         private int _capturedMidiInControlsSelected = 0;
 
-        public MIDIControlWizardViewModel(string title, HardwareSettingsViewModel hardwareSettings)
+        public MIDIControlWizardViewModel(HardwareSettingsViewModel hardwareSettings)
         {
             _hardwareSettings = hardwareSettings;
 
-            Title = title;
+            Title = Properties.Resources.MidiControlWizardText;
 
             SaveMidiControlCommand = new RelayCommand(SaveMidiControl);
             SetMinValueCommand = new RelayCommand(SetMinValue);
@@ -257,22 +257,21 @@ namespace EarTrumpet.HardwareControls.ViewModels
             ControlTypeSelected = _controlTypeSelected;
         }
 
-        public MIDIControlWizardViewModel(string title, HardwareSettingsViewModel hardwareSettings,
-            MidiConfiguration config): this(title, hardwareSettings)
+        public MIDIControlWizardViewModel(HardwareSettingsViewModel hardwareSettings, MidiConfiguration config)
+            : this(hardwareSettings)
         {
             MinValue = config.MinValue;
             MaxValue = config.MaxValue;
             ScalingValue = config.ScalingValue;
             ControlTypeSelected = (int)config.ControllerType;
             SelectedMidi = config.MidiDevice;
-            _capturedMidiInControls.Add("Channel=" + config.Channel + ", Controller=" + config.Controller +
-                                        ", Value=0");
+            _capturedMidiInControls.Add($"Channel={config.Channel}, Controller={config.Controller}, Value=0");
         }
 
         public void SaveMidiControl()
         {
             // Check for valid widget entries.
-            if(string.IsNullOrEmpty(SelectedMidi) ||
+            if (string.IsNullOrEmpty(SelectedMidi) ||
                 string.IsNullOrEmpty(CapturedMidiInControls[CapturedMidiInControlsSelected]) ||
                 string.IsNullOrEmpty(ControlTypes[ControlTypeSelected]))
             {
@@ -281,7 +280,11 @@ namespace EarTrumpet.HardwareControls.ViewModels
             }
 
             // Generate MIDI control configuration object.
-            MidiConfiguration midiConfiguration = new MidiConfiguration(SelectedMidi, GetCurrentSelectionProperty("Channel"), GetCurrentSelectionProperty("Controller"), MidiConfiguration.GetControllerType(ControlTypes[_controlTypeSelected]), MinValue, MaxValue, ScalingValue);
+            MidiConfiguration midiConfiguration = new MidiConfiguration(
+                SelectedMidi,
+                GetCurrentSelectionProperty("Channel"),
+                GetCurrentSelectionProperty("Controller"),
+                MidiConfiguration.GetControllerType(ControlTypes[_controlTypeSelected]), MinValue, MaxValue, ScalingValue);
 
             // Notify the hardware settings about the new control configuration.
             _hardwareSettings.ControlSelectedCallback(midiConfiguration);
@@ -333,12 +336,12 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 bool elementFound = false;
                 for (var i = 0; i < _capturedMidiInControls.Count(); i++)
                 {
-                    if (-1 != _capturedMidiInControls[i].IndexOf("Channel=" + msg.Channel + ", Controller=" + msg.Controller))
+                    if (-1 != _capturedMidiInControls[i].IndexOf($"Channel={msg.Channel}, Controller={msg.Controller}"))
                     {
                         // This channel and controller pair is already part of the list.
                         // -> Just refresh the value.
 
-                        _capturedMidiInControls[i] = "Channel=" + msg.Channel + ", Controller=" + msg.Controller + ", Value=" + msg.ControlValue;
+                        _capturedMidiInControls[i] = $"Channel={msg.Channel}, Controller={msg.Controller}, Value={msg.ControlValue}";
 
                         elementFound = true;
 
@@ -355,7 +358,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
                 if (!elementFound)
                 {
                     // The channel and controller pair was not part of the list, so add it.
-                    _capturedMidiInControls.Add("Channel=" + msg.Channel + ", Controller=" + msg.Controller + ", Value=" + msg.ControlValue);
+                    _capturedMidiInControls.Add($"Channel={msg.Channel}, Controller={msg.Controller}, Value={msg.ControlValue}");
                     // Select the first item when the first control is added
                     if (_capturedMidiInControls.Count == 1)
                     {

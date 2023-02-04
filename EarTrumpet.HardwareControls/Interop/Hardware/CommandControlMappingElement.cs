@@ -24,27 +24,32 @@
         public string audioDevice { get; set; }
         public Command command { get; set; }
         public Mode mode { get; set; }
-        public string indexApplicationSelection { get; set; }
-        public HardwareConfiguration hardwareConfiguration { get; set; }
+        public string appId { get; set; }
+        public string appDisplayName{ get; set; }
+        public int index { get; set; }
+        public HardwareConfiguration config { get; set; }
 
-        // Constructor
+        // Constructors
+
+        // TODO: if this isn't present, then HardwareManager.Current is null and crashes
+        public CommandControlMappingElement() { }
+
         public CommandControlMappingElement(
-            HardwareConfiguration hardwareConfiguration,
-            string audioDevice, 
+            string audioDevice,
             Command command,
             Mode mode, 
-            string indexApplicationSelection)
+            string appId,
+            string appDisplayName,
+            int index,
+            HardwareConfiguration config)
         {
-            this.hardwareConfiguration = hardwareConfiguration;
             this.audioDevice = audioDevice;
             this.command = command;
             this.mode = mode;
-            this.indexApplicationSelection = indexApplicationSelection;
-        }
-
-        public CommandControlMappingElement()
-        {
-            
+            this.appId = appId;
+            this.appDisplayName = appDisplayName;
+            this.index = index;
+            this.config = config;
         }
     }
 }

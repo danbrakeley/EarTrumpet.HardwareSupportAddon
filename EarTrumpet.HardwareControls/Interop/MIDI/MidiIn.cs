@@ -152,7 +152,7 @@ namespace EarTrumpet.HardwareControls.Interop.MIDI
             {
                 foreach (var command in commands)
                 {
-                    var config = (MidiConfiguration) command.hardwareConfiguration;
+                    var config = (MidiConfiguration) command.config;
                     if (config.MidiDevice == device.Name)
                     {
                         _StartListening(device.Id);

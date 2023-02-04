@@ -148,6 +148,8 @@ namespace EarTrumpet.HardwareControls.ViewModels
             {
                 var entry = new ControlMappingListEntry();
 
+                entry.DeviceName = item.audioDevice;
+
                 switch (item.command) {
                     case CommandControlMappingElement.Command.SystemVolume: entry.Type = Properties.Resources.MappingsListTypeSysVolText; break;
                     case CommandControlMappingElement.Command.SystemMute: entry.Type = Properties.Resources.MappingsListTypeSysMuteText; break;
@@ -162,9 +164,11 @@ namespace EarTrumpet.HardwareControls.ViewModels
                     case CommandControlMappingElement.Command.ApplicationVolume:
                     case CommandControlMappingElement.Command.ApplicationMute:
                         if (item.mode == CommandControlMappingElement.Mode.Indexed) {
-                            entry.Context = "[ " + item.indexApplicationSelection + " ]";
-                        } else {
-                            entry.Context = item.indexApplicationSelection;
+                            entry.Context = $"[ {item.index} ]";
+                        } else if (item.mode == CommandControlMappingElement.Mode.ApplicationSelection) {
+                            entry.Context = item.appDisplayName;
+                        } else if (item.mode == CommandControlMappingElement.Mode.ApplicationFocus) {
+                            entry.Context = $"[ {Properties.Resources.MappingsListFocusedAppText} ]";
                         }
                         break;
                     case CommandControlMappingElement.Command.SystemVolume:
@@ -172,11 +176,10 @@ namespace EarTrumpet.HardwareControls.ViewModels
                     case CommandControlMappingElement.Command.SetDefaultDevice:
                     case CommandControlMappingElement.Command.CycleDefaultDevice:
                     default:
-                        entry.Context = item.audioDevice;
                         break;
                 }
 
-                entry.Control = item.hardwareConfiguration.ToStringCompact();
+                entry.Control = item.config.ToStringCompact();
 
                 mappings.Add(entry);
             }

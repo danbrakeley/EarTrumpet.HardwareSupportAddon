@@ -15,7 +15,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
         public override Type ConfigType => typeof(DeejConfiguration);
         
         public static DeejAppBinding Current;
-        private const string SAVEKEY = "DeejControls";
+        private const string SAVEKEY = "DeejControls2";
         private Dictionary<CommandControlMappingElement, int> lastValues;
         public DeejAppBinding(DeviceCollectionViewModel deviceViewModel, IAudioDeviceManager audioDeviceManager) : 
             base(deviceViewModel, audioDeviceManager)
@@ -29,14 +29,14 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
 
             foreach (var command in _commandControlMappings)
             {
-                var config = (DeejConfiguration) command.hardwareConfiguration;
+                var config = (DeejConfiguration) command.config;
                 DeejIn._StartListening(config.Port);
             }
         }
 
         public override void AddCommand(CommandControlMappingElement command)
         {
-            var config = (DeejConfiguration) command.hardwareConfiguration;
+            var config = (DeejConfiguration) command.config;
             DeejIn._StartListening(config.Port);
             
             _commandControlMappings.Add(command);
@@ -66,7 +66,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
                 return;
             }
 
-            var config = (DeejConfiguration) newCommand.hardwareConfiguration;
+            var config = (DeejConfiguration) newCommand.config;
             DeejIn._StartListening(config.Port);
 
             _commandControlMappings[index] = newCommand;
@@ -117,7 +117,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
         {
             foreach (var command in _commandControlMappings)
             {
-                var config = (DeejConfiguration) command.hardwareConfiguration;
+                var config = (DeejConfiguration) command.config;
 
                 if (config.Port == port && channels.Count > config.Channel)
                 {
@@ -153,7 +153,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
 
             foreach (var device in devices)
             {
-                device.Volume = SetVolume((DeejConfiguration)command.hardwareConfiguration, value);
+                device.Volume = SetVolume((DeejConfiguration)command.config, value);
             }
         }
 
@@ -163,7 +163,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
 
             foreach (var device in devices)
             {
-                device.IsMuted = SetMute((DeejConfiguration)command.hardwareConfiguration, value);
+                device.IsMuted = SetMute((DeejConfiguration)command.config, value);
             }
         }
         
@@ -172,12 +172,15 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
             List<IAppItemViewModel> apps = null;
             if (command.mode == CommandControlMappingElement.Mode.ApplicationSelection)
             {
-                apps = GetAppsByName(command.audioDevice, command.indexApplicationSelection);
+                apps = GetAppsByAppId(command.audioDevice, command.appId);
             } else if (command.mode == CommandControlMappingElement.Mode.Indexed)
             {
-                apps = GetAppsByIndex(command.audioDevice, command.indexApplicationSelection);
+                apps = GetAppsByIndex(command.audioDevice, command.index);
+            } else if (command.mode == CommandControlMappingElement.Mode.ApplicationFocus)
+            {
+                apps = GetFocusedApps(command.audioDevice);
             }
-                
+
             if (apps == null)
             {
                 return;
@@ -185,7 +188,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
 
             foreach (var app in apps)
             {
-                app.Volume = SetVolume((DeejConfiguration)command.hardwareConfiguration, value);
+                app.Volume = SetVolume((DeejConfiguration)command.config, value);
             }
         }
 
@@ -194,12 +197,15 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
             List<IAppItemViewModel> apps = null;
             if (command.mode == CommandControlMappingElement.Mode.ApplicationSelection)
             {
-                apps = GetAppsByName(command.audioDevice, command.indexApplicationSelection);
+                apps = GetAppsByAppId(command.audioDevice, command.appId);
             } else if (command.mode == CommandControlMappingElement.Mode.Indexed)
             {
-                apps = GetAppsByIndex(command.audioDevice, command.indexApplicationSelection);
+                apps = GetAppsByIndex(command.audioDevice, command.index);
+            } else if (command.mode == CommandControlMappingElement.Mode.ApplicationFocus)
+            {
+                apps = GetFocusedApps(command.audioDevice);
             }
-                
+
             if (apps == null)
             {
                 return;
@@ -207,13 +213,13 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
             
             foreach (var app in apps)
             {
-                app.IsMuted = SetMute((DeejConfiguration)command.hardwareConfiguration, value);
+                app.IsMuted = SetMute((DeejConfiguration)command.config, value);
             }
         }
         
         private void DefaultDevice(CommandControlMappingElement command, int value)
         {
-            var config = (DeejConfiguration) command.hardwareConfiguration;
+            var config = (DeejConfiguration) command.config;
             var calcVolume = Current.CalculateVolume(value, config.MinValue, config.MaxValue, config.ScalingValue);
 
             if (calcVolume > 50)
@@ -239,7 +245,7 @@ namespace EarTrumpet.HardwareControls.Interop.Deej
         
         private void CycleDefaultDevice(CommandControlMappingElement command, int value)
         {
-            var config = (DeejConfiguration) command.hardwareConfiguration;
+            var config = (DeejConfiguration) command.config;
             var calcVolume = CalculateVolume(value, config.MinValue, config.MaxValue, config.ScalingValue);
 
             if (calcVolume >= 50 && lastValues[command] < 50)

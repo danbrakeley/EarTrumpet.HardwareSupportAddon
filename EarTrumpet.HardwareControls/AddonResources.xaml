@@ -49,6 +49,9 @@
                 <ListView.View>
                     <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="{x:Static resx:Resources.MappingsListHeaderAltText}">
                         <GridViewColumn
+                            Header="{x:Static resx:Resources.MappingsListHeaderDeviceText}"
+                            DisplayMemberBinding="{Binding Path=DeviceName}"/>
+                        <GridViewColumn
                             Header="{x:Static resx:Resources.MappingsListHeaderTypeText}"
                             DisplayMemberBinding="{Binding Path=Type}"/>
                         <GridViewColumn
