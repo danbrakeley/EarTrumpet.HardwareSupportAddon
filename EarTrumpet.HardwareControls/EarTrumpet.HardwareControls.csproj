@@ -30,7 +30,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\..\EarTrumpet\Build\Release\Addons\EarTrumpet.HardwareControls\</OutputPath>
+    <OutputPath>..\..\EarTrumpet\Build\Release\Addons\EarTrumpet.HardwareControls\2.2.1.0\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
