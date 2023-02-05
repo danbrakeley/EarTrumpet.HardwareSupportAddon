@@ -25,7 +25,35 @@ namespace EarTrumpet.HardwareControls.ViewModels
         public ICommand DeleteSelectedControlCommand { get; }
         public ICommand NewFromSelectedControlCommand { get; }
         public ItemModificationWays ItemModificationWay { get; set; }
-        public int SelectedIndex { get; set; }
+
+        private int _selectedIndex = -1;
+        public int SelectedIndex
+        {
+            get { return _selectedIndex; }
+            set
+            {
+                _selectedIndex = value;
+                RaisePropertyChanged("SelectedIndex");
+
+                var hasSelection = value >= 0;
+                if (IsControlSelected != hasSelection)
+                {
+                    IsControlSelected = hasSelection;
+                }
+            }
+        }
+
+        private bool _isControlSelected;
+        public bool IsControlSelected
+        {
+            get { return _isControlSelected; }
+            set
+            {
+                _isControlSelected = value;
+                RaisePropertyChanged("IsControlSelected");
+            }
+
+        }
 
         public ObservableCollection<ControlMappingListEntry> HardwareControls
         {
@@ -61,9 +89,6 @@ namespace EarTrumpet.HardwareControls.ViewModels
             _hardwareSettingsWindow = new WindowHolder(CreateHardwareSettingsExperience);
 
             UpdateCommandControlsList();
-
-            // The command controls list should have no item selected on startup.
-            SelectedIndex = -1;
         }
 
         public void ControlCommandMappingSelectedCallback(CommandControlMappingElement commandControlMappingElement)
@@ -98,9 +123,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
         }
         private void EditSelectedControl()
         {
-            var selectedIndex = SelectedIndex;
-
-            if (selectedIndex < 0)
+            if (this.SelectedIndex < 0)
             {
                 System.Windows.Forms.MessageBox.Show(Properties.Resources.NoControlSelectedMessage, "EarTrumpet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -112,9 +135,7 @@ namespace EarTrumpet.HardwareControls.ViewModels
 
         private void NewFromSelectedControl()
         {
-            var selectedIndex = SelectedIndex;
-
-            if (selectedIndex < 0)
+            if (this.SelectedIndex < 0)
             {
                 System.Windows.Forms.MessageBox.Show(Properties.Resources.NoControlSelectedMessage, "EarTrumpet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -126,15 +147,13 @@ namespace EarTrumpet.HardwareControls.ViewModels
         
         private void DeleteSelectedControl()
         {
-            var selectedIndex = SelectedIndex;
-
-            if(selectedIndex < 0)
+            if (this.SelectedIndex < 0)
             {
                 System.Windows.Forms.MessageBox.Show(Properties.Resources.NoControlSelectedMessage, "EarTrumpet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            HardwareManager.Current.RemoveCommandAt(selectedIndex);
+            HardwareManager.Current.RemoveCommandAt(this.SelectedIndex);
             UpdateCommandControlsList();
         }
 
